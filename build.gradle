@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'library'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
+}
+
+run{
+    standardInput=System.in
+}
+
+application{
+    mainClass ='library.app.UserInteraction'
+
+}
+test {
+    useJUnitPlatform()
+}
+sourceCompatibility = '11'
+targetCompatibility = '11'
