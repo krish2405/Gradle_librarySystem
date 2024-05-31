@@ -24,7 +24,7 @@ public class UserInteraction {
                 "Reviews DECIMAL(10,2) ";
 
         String tableNameadminuser = "adminuser";
-        String columnDefinitionforadminuser = "u_id INT PRIMARY KEY AUTO_INCREMENT, " +
+        String columnDefinitionforadminuser="u_id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "name VARCHAR(255) NOT NULL, " +
                 "Password VARCHAR(255) NOT NULL, " +
                 "age INT, " +
@@ -34,13 +34,14 @@ public class UserInteraction {
                 "email VARCHAR(255), " +
                 "isadmin BOOLEAN";
 
+
         String tablenameuserbook="userwithbook";
         String columndefintionuserbook="bb_id INT AUTO_INCREMENT PRIMARY KEY, "+
                 "b_id INT, "+
                 "u_id INT, "+
                 "return_date DATE, "+
                 "borrow_date DATE , "+
-                "FOREIGN KEY (b_id) REFERENCES Books(b_id), "+
+                "FOREIGN KEY (b_id) REFERENCES books(b_id), "+
                 "FOREIGN KEY (u_id) REFERENCES adminuser(u_id)";
 
 
@@ -53,7 +54,6 @@ public class UserInteraction {
             System.out.println("We are creating a dummy admin for you so that you can have all the privileges");
             UserDatamanagement.createadmin();
 
-
         }
         else{
             System.out.println("you have the table in db");
@@ -64,16 +64,6 @@ public class UserInteraction {
 
 
         String logininfo=UserDatamanagement.login();
-//        String logininfo = null;
-//        try {
-//            logininfo = UserDatamanagement.login();
-//        } catch (Exception e) {
-//            System.out.println("No input found, exiting.");
-//            DatabaseConnection.close();
-//            sc.close();
-//            return;
-//        }
-
         System.out.println(logininfo);
 
         if (logininfo==null){

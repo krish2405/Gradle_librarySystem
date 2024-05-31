@@ -5,19 +5,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Scanner;
-// import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import library.data.DatabaseConnection;
 import library.utility.Utilityfunctions;
 import library.DOA.QueryOperation;
-//import java.util.Scanner;
 
 
 public class UserDatamanagement {
-
-
-
 
     // Table for user and admin
     public static void createTable(String tableName, String columnDefinitions) {
@@ -418,8 +411,6 @@ public class UserDatamanagement {
                 default:
                     break;
             }
-
-            // sc.close();
 
         } catch (Exception e) {
             e.printStackTrace();

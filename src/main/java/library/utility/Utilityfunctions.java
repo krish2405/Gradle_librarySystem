@@ -47,8 +47,9 @@ public class Utilityfunctions {
     // Check if table exists
     public static boolean tableExists(String tableName) {
         try {
+            String schemaname="library";
             DatabaseMetaData metaData = DatabaseConnection.connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, "library", tableName, null);
+            ResultSet resultSet = metaData.getTables(schemaname, null, tableName, null);
             return resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
