@@ -9,56 +9,31 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import library.data.DatabaseConnection;
+import library.utility.Utilityfunctions;
+import library.DOA.QueryOperation;
 //import java.util.Scanner;
 
 
 public class UserDatamanagement {
 
-    // Validations
-    public static boolean validateName(String name) {
-        // Name should not be empty
-        return !name.trim().isEmpty();
-    }
 
-    public static boolean validatePassword(String password) {
-        // Password should have at least one special character
-        Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
-        Matcher matcher = pattern.matcher(password);
-        return matcher.find();
-    }
-
-    public static boolean validateEmail(String email) {
-        // Email should contain '@'
-        return email.contains("@");
-    }
 
 
     // Table for user and admin
     public static void createTable(String tableName, String columnDefinitions) {
         try {
-            String query = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnDefinitions + ")";
-            DatabaseConnection.statement.executeUpdate(query);
+//            String query = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnDefinitions + ")";
+            DatabaseConnection.statement.executeUpdate(QueryOperation.CREATE_TABLE);
             System.out.println("Table created successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Check if table exists
-    public static boolean tableExists(String tableName) {
-        try {
-            DatabaseMetaData metaData = DatabaseConnection.connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, tableName, null);
-            return resultSet.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     // Create table if it doesn't exist
     public static int createTableIfNotExists(String tableName, String columnDefinitions) {
-        if (!tableExists(tableName)) {
+        if (!Utilityfunctions.tableExists(tableName)) {
             createTable(tableName, columnDefinitions);
             System.out.println("Table has been created");
             return 1;
@@ -84,8 +59,8 @@ public class UserDatamanagement {
             String password = sc.nextLine();
 
 
-            String query = "SELECT isadmin FROM adminuser WHERE name = ? AND Password = ?";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+//            String query = "SELECT isadmin FROM adminuser WHERE name = ? AND Password = ?";
+            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.LOGIN);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, password);
 
@@ -112,8 +87,8 @@ public class UserDatamanagement {
 
     public static void createadmin() {
         try {
-            String query = "INSERT INTO adminuser (name,Password, age, DOB,Signup_date, Modification_date, email, isadmin) VALUES (?,?,?,?, CURRENT_DATE, CURRENT_DATE, ?, ?)";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+//            String query = "INSERT INTO adminuser (name,Password, age, DOB,Signup_date, Modification_date, email, isadmin) VALUES (?,?,?,?, CURRENT_DATE, CURRENT_DATE, ?, ?)";
+            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.INSERT_USER);
             String dobstring = "2002-06-12";
             Date dob = null;
 
@@ -154,7 +129,7 @@ public class UserDatamanagement {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Enter name to insert:");
             String name = scanner.nextLine();
-            if (!validateName(name)) {
+            if (!Utilityfunctions.validateName(name)) {
                 System.out.println("Name cannot be empty.");
                 return;
             }
@@ -176,7 +151,7 @@ public class UserDatamanagement {
             java.util.Arrays.fill(passwordArray, ' ');
 
 
-            if (!validatePassword(password)) {
+            if (!Utilityfunctions.validatePassword(password)) {
                 System.out.println("Password must contain at least one special character.");
                 return;
             }
@@ -207,7 +182,7 @@ public class UserDatamanagement {
             }
             System.out.println("Enter email to insert:");
             String email = scanner.nextLine();
-            if (!validateEmail(email)) {
+            if (!Utilityfunctions.validateEmail(email)) {
                 System.out.println("Email must contain '@'.");
                 return;
             }
@@ -216,8 +191,8 @@ public class UserDatamanagement {
             boolean isAdmin = Boolean.parseBoolean(scanner.nextLine());
 
             // Adjusted the query to exclude the DOB column and use CURRENT_DATE for Signup_date and Modification_date
-            String query = "INSERT INTO adminuser (name,Password, age, DOB,Signup_date, Modification_date, email, isadmin) VALUES (?,?,?,?, CURRENT_DATE, CURRENT_DATE, ?, ?)";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+//            String query = "INSERT INTO adminuser (name,Password, age, DOB,Signup_date, Modification_date, email, isadmin) VALUES (?,?,?,?, CURRENT_DATE, CURRENT_DATE, ?, ?)";
+            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.INSERT_USER);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, password);
             preparedStatement.setInt(3, age);
@@ -239,8 +214,8 @@ public class UserDatamanagement {
 
     public static void ShowAlluser() {
         try {
-            String query = "SELECT * FROM adminuser";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+//            String query = "SELECT * FROM adminuser";
+            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.SHOW_ALL_USERS);
 
             ResultSet rs = preparedStatement.executeQuery();
             System.out.println("Here is the information.");
@@ -276,8 +251,8 @@ public class UserDatamanagement {
             System.out.println("Enter user ID:");
             int u_id = sc.nextInt();
 
-            String query = "SELECT * FROM adminuser WHERE name=? AND u_id=?";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+//            String query = "SELECT * FROM adminuser WHERE name=? AND u_id=?";
+            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.USER_INFO);
             preparedStatement.setString(1, name);
             preparedStatement.setInt(2, u_id);
             ResultSet rs = preparedStatement.executeQuery();
@@ -315,8 +290,8 @@ public class UserDatamanagement {
             System.out.println("Enter user ID:");
             int u_id = sc.nextInt();
 
-            String checkQuery = "SELECT COUNT(*) FROM userwithbook WHERE u_id = ?";
-            PreparedStatement checkStatement = DatabaseConnection.connection.prepareStatement(checkQuery);
+//            String checkQuery = "SELECT COUNT(*) FROM userwithbook WHERE u_id = ?";
+            PreparedStatement checkStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.CHECK_USER_WITH_BOOK);
             // checkStatement.setInt(1, b_id);
             checkStatement.setInt(1, u_id);
             ResultSet checkResult = checkStatement.executeQuery();
@@ -328,8 +303,8 @@ public class UserDatamanagement {
                 return;
             }
 
-            String query = "DELETE FROM adminuser WHERE name=? and u_id=?";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+//            String query = "DELETE FROM adminuser WHERE name=? and u_id=?";
+            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.DELETE_USER);
             preparedStatement.setString(1, name);
             preparedStatement.setInt(2, u_id);
 
@@ -367,8 +342,8 @@ public class UserDatamanagement {
                 case 1:
                     System.out.println("Enter Your Name");
                     String name = sc.nextLine();
-                    String query = "UPDATE adminuser SET name=? , Modification_date =? where u_id=? and Password=?";
-                    PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+//                    String query = "UPDATE adminuser SET name=? , Modification_date =? where u_id=? and Password=?";
+                    PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(QueryOperation.UPDATE_USER_NAME);
                     preparedStatement.setString(1, name);
                     preparedStatement.setDate(2, sqlCurrentDate);
                     preparedStatement.setInt(3, u_id);
@@ -381,29 +356,11 @@ public class UserDatamanagement {
                     }
                     break;
 
-                // case 2:
-                // System.out.println("Enter Your Age:");
-                // int age = sc.nextInt();
-                // String query2 = "UPDATE adminuser SET age=? , Modification_date =? where u_id=? and Password=?";
-                // PreparedStatement preparedStatement2 = DatabaseConnection.connection.prepareStatement(query2);
-                // preparedStatement2.setInt(1,age) ;
-                // preparedStatement2.setDate(2, sqlCurrentDate);
-                // preparedStatement2.setInt(3, u_id);
-                // preparedStatement2.setString(4, Password);
-                // int rowsUpdatedAge = preparedStatement2.executeUpdate();
-                // if (rowsUpdatedAge > 0) {
-                //     System.out.println("Age updated successfully.");
-                // }
-                // else{
-                //     System.out.println("Sorry Password or User id does not match");
-                // }
-                //     break;
-
                 case 2:
                     System.out.println("Enter Your Password:");
                     String password = sc.nextLine();
-                    String queryPassword = "UPDATE adminuser SET Password=?, Modification_date=? WHERE u_id=? AND Password=?";
-                    PreparedStatement preparedStatementPassword = DatabaseConnection.connection.prepareStatement(queryPassword);
+//                    String queryPassword = "UPDATE adminuser SET Password=?, Modification_date=? WHERE u_id=? AND Password=?";
+                    PreparedStatement preparedStatementPassword = DatabaseConnection.connection.prepareStatement(QueryOperation.UPDATE_USER_PASSWORD);
                     preparedStatementPassword.setString(1, password);
                     preparedStatementPassword.setDate(2, sqlCurrentDate);
                     preparedStatementPassword.setInt(3, u_id);
@@ -427,8 +384,8 @@ public class UserDatamanagement {
                         System.err.println("Invalid date format. Please enter the date in YYYY-MM-DD format.");
                         e.printStackTrace();
                     }
-                    String queryDOB = "UPDATE adminuser SET DOB=?, Modification_date=? WHERE u_id=? AND Password=?";
-                    PreparedStatement preparedStatementDOB = DatabaseConnection.connection.prepareStatement(queryDOB);
+//                    String queryDOB = "UPDATE adminuser SET DOB=?, Modification_date=? WHERE u_id=? AND Password=?";
+                    PreparedStatement preparedStatementDOB = DatabaseConnection.connection.prepareStatement(QueryOperation.UPDATE_USER_DOB);
                     preparedStatementDOB.setDate(1, dob);
                     preparedStatementDOB.setDate(2, sqlCurrentDate);
                     preparedStatementDOB.setInt(3, u_id);
@@ -444,8 +401,8 @@ public class UserDatamanagement {
                 case 4:
                     System.out.println("Enter Your Email:");
                     String email = sc.nextLine();
-                    String queryEmail = "UPDATE adminuser SET email=?, Modification_date=? WHERE u_id=? AND Password=?";
-                    PreparedStatement preparedStatementEmail = DatabaseConnection.connection.prepareStatement(queryEmail);
+//                    String queryEmail = "UPDATE adminuser SET email=?, Modification_date=? WHERE u_id=? AND Password=?";
+                    PreparedStatement preparedStatementEmail = DatabaseConnection.connection.prepareStatement(QueryOperation.UPDATE_USER_EMAIL);
                     preparedStatementEmail.setString(1, email);
                     preparedStatementEmail.setDate(2, sqlCurrentDate);
                     preparedStatementEmail.setInt(3, u_id);

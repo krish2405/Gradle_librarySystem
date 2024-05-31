@@ -1,37 +1,24 @@
 package library.businesslogic;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 import library.data.DatabaseConnection;
+import library.utility.Utilityfunctions;
+import library.DOAforuserwithbooks.userBookDataAccess;
 
 public class UserBookDataManagement {
     public static void createuserwithbookTable(String tableName, String columnDefinitions) {
         try {
-            String query = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnDefinitions + ")";
-            DatabaseConnection.statement.executeUpdate(query);
+            userBookDataAccess.createUserWithBookTable(tableName,columnDefinitions);
             System.out.println("Table created successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // Check if table exists
-    public static boolean tableExists(String tableName) {
-        try {
-            DatabaseMetaData metaData = DatabaseConnection.connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, tableName, null);
-            return resultSet.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     // Create table if it doesn't exist
     public static void createTableIfNotExists(String tableName, String columnDefinitions) {
-        if (!tableExists(tableName)) {
+        if (!Utilityfunctions.tableExists(tableName)) {
             createuserwithbookTable(tableName, columnDefinitions);
         } else {
             System.out.println("Table already exists.");
@@ -46,27 +33,10 @@ public class UserBookDataManagement {
 
             System.out.println("Enter user ID:");
             int u_id=sc.nextInt();
-
-            String b_idquery = "SELECT b_id FROM userwithbook WHERE u_id=?";
-            PreparedStatement b_iPreparedStatement = DatabaseConnection.connection.prepareStatement(b_idquery);
-            b_iPreparedStatement.setInt(1, u_id);
-            ResultSet rs3ResultSet = b_iPreparedStatement.executeQuery();
+            ResultSet rs3ResultSet = userBookDataAccess.getUserBookIds(u_id);
             while(rs3ResultSet.next()){
                 int b_id=Integer.parseInt( rs3ResultSet.getString(1));
-                // System.out.println(b_id);
-
-                String querym="SELECT DISTINCT u.u_id, u.name, b.b_id, b.book_name,ub.borrow_date " +
-                        "FROM adminuser u " +
-                        "JOIN userwithbook ub ON u.u_id = ub.u_id " +
-                        "JOIN books b ON ub.b_id = b.b_id " +
-                        "WHERE u.u_id = ? AND b.b_id = ?";
-                PreparedStatement qPreparedStatement=DatabaseConnection.connection.prepareStatement(querym);
-                qPreparedStatement.setInt(1,u_id);
-                qPreparedStatement.setInt(2,b_id);
-
-
-                ResultSet resultSet=qPreparedStatement.executeQuery();
-
+                ResultSet resultSet=userBookDataAccess.getAllUserBookInfo(u_id,b_id);
 
                 while (resultSet.next()) {
                     int userId = resultSet.getInt(1);
@@ -81,9 +51,6 @@ public class UserBookDataManagement {
 
             }
 
-            // sc.close();
-
-
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -92,36 +59,14 @@ public class UserBookDataManagement {
 
     public static void alluserwithbookinfo(){
         try{
-            String idquery = "SELECT DISTINCT u_id FROM userwithbook";
-            PreparedStatement iPreparedStatement = DatabaseConnection.connection.prepareStatement(idquery);
-            // b_iPreparedStatement.setInt(1, u_id);
-            ResultSet rs3ResultSet = iPreparedStatement.executeQuery();
+            ResultSet rs3ResultSet = userBookDataAccess.getAllUserIdsWithBooks();
 
             while(rs3ResultSet.next()){
                 int u_id=Integer.parseInt(rs3ResultSet.getString(1));
-                // System.out.println(u_id);
-
-                String b_idquery = "SELECT b_id FROM userwithbook where u_id=?";
-                PreparedStatement b_iPreparedStatement = DatabaseConnection.connection.prepareStatement(b_idquery);
-                b_iPreparedStatement.setInt(1, u_id);
-                ResultSet B_rs3ResultSet = b_iPreparedStatement.executeQuery();
+                ResultSet B_rs3ResultSet = userBookDataAccess.getBookIdsByUser(u_id);
                 while(B_rs3ResultSet.next()){
                     int b_id=Integer.parseInt( B_rs3ResultSet.getString(1));
-                    // System.out.println(b_id);
-
-                    String querym="SELECT u.u_id, u.name, b.b_id, b.book_name ,ub.borrow_date " +
-                            "FROM adminuser u " +
-                            "JOIN userwithbook ub ON u.u_id = ub.u_id " +
-                            "JOIN books b ON ub.b_id = b.b_id " +
-                            "WHERE u.u_id = ? AND b.b_id = ?";
-                    PreparedStatement qPreparedStatement=DatabaseConnection.connection.prepareStatement(querym);
-                    qPreparedStatement.setInt(1,u_id);
-                    qPreparedStatement.setInt(2,b_id);
-
-
-                    ResultSet resultSet=qPreparedStatement.executeQuery();
-
-
+                    ResultSet resultSet=userBookDataAccess.getAllUserBookInfo(u_id,b_id);
                     while (resultSet.next()) {
                         int userId = resultSet.getInt(1);
                         String username = resultSet.getString(2);

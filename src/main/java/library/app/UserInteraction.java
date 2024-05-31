@@ -14,7 +14,7 @@ public class UserInteraction {
         DatabaseConnection.connect();
 
         Scanner sc= new Scanner(System.in);
-        String tablenamebooks="Books";
+        String tablenamebooks="books";
         String columndefintion="b_id INT AUTO_INCREMENT PRIMARY KEY, "+
                 "book_name VARCHAR(255), "+
                 "geners VARCHAR(255), "+

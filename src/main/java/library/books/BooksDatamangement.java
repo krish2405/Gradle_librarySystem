@@ -1,68 +1,32 @@
 package library.books;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
+
+import library.DOAforBooks.BooksDataAccess;
 import  library.data.DatabaseConnection;
+import library.utility.Utilityfunctions;
 
 
 public class BooksDatamangement {
 
-    public static boolean validateStringInput(String input) {
-        // Input should not be empty or null
-        return input != null && !input.trim().isEmpty();
-    }
-
-    public static boolean validateQuantity(int quantity) {
-        // Quantity should be a positive integer
-        return quantity > 0;
-    }
-
-    public static boolean validateReviews(double reviews) {
-        // Reviews should be in the range 0 to 5
-        return reviews >= 0 && reviews <= 5;
-    }
-
-    // Creating Books table
-    public static void createbookstable(String tableName,String columnDefinitions){
-        try {
-            String query = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columnDefinitions + ")";
-            DatabaseConnection.statement.executeUpdate(query);
-            System.out.println("Table created successfully.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    // Check if table exists
-    public static boolean tableExists(String tableName) {
-        try {
-            DatabaseMetaData metaData = DatabaseConnection.connection.getMetaData();
-            ResultSet resultSet = metaData.getTables(null, null, tableName, null);
-            return resultSet.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // Create table if it doesn't exist
     public static void createTableIfNotExists(String tableName, String columnDefinitions) {
-        if (!tableExists(tableName)) {
-            createbookstable(tableName, columnDefinitions);
-        } else {
-            System.out.println("Table already exists.");
+        try {
+            if (!BooksDataAccess.tableExists(tableName)) {
+                BooksDataAccess.createBooksTable(tableName, columnDefinitions);
+                System.out.println("Table created successfully.");
+            } else {
+                System.out.println("Table already exists.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     public static void ShowAllBooks(){
         try {
-            String query = "SELECT * FROM books";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
+            ResultSet rs= BooksDataAccess.getAllBooks();
 
-            ResultSet rs=preparedStatement.executeQuery();
             System.out.println("Here is the information.");
             while(rs.next()){
 
@@ -73,10 +37,8 @@ public class BooksDatamangement {
                 System.out.print("quantity : "+ rs.getString(5)+", ");
                 System.out.print("Price : "+ rs.getString(6)+", ");
                 System.out.println("Reviews : "+rs.getString(7)+".");
-                // System.out.println("Isadmin :" + rs.getString(9));
 
             }
-
 
 
         } catch (Exception e) {
@@ -93,16 +55,14 @@ public class BooksDatamangement {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Enter Book name :");
             String b_name = scanner.nextLine();
-            if (!validateStringInput(b_name)) {
+            if (!Utilityfunctions.validateStringInput(b_name)) {
                 System.out.println("Book name cannot be empty.");
                 return;
             }
 
-
-
             System.out.println("Enter Geners:");
             String geners = scanner.nextLine();
-            if (!validateStringInput(geners)) {
+            if (!Utilityfunctions.validateStringInput(geners)) {
                 System.out.println("Genre cannot be empty.");
                 return;
             }
@@ -110,14 +70,14 @@ public class BooksDatamangement {
 
             System.out.println("Enter author:");
             String author = scanner.nextLine();
-            if (!validateStringInput(author)) {
+            if (!Utilityfunctions.validateStringInput(author)) {
                 System.out.println("Author cannot be empty.");
                 return;
             }
 
             System.out.println("Enter quantity:");
             int quantity = scanner.nextInt();
-            if (!validateQuantity(quantity)) {
+            if (!Utilityfunctions.validateQuantity(quantity)) {
                 System.out.println("Quantity must be a positive integer.");
                 return;
             }
@@ -128,21 +88,12 @@ public class BooksDatamangement {
 
             System.out.println("Enter reviews (0 -5) ");
             Double Reviews = scanner.nextDouble();
-            if (!validateReviews(Reviews)) {
+            if (!Utilityfunctions.validateReviews(Reviews)) {
                 System.out.println("Reviews must be in the range 0 to 5.");
                 return;
             }
 
-            // Adjusted the query to exclude the DOB column and use CURRENT_DATE for Signup_date and Modification_date
-            String query = "INSERT INTO books (book_name,geners, author, quantity, price , Reviews) VALUES (?,?,?,?,?, ?)";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
-            preparedStatement.setString(1, b_name);
-            preparedStatement.setString(2, geners);
-            preparedStatement.setString(3, author);
-            preparedStatement.setInt(4, quantity);
-            preparedStatement.setDouble(5, price);
-            preparedStatement.setDouble(6, Reviews);
-            int rowinserted = preparedStatement.executeUpdate();
+            int rowinserted = BooksDataAccess.insertBook(b_name,geners,author,quantity,price,Reviews);
             if (rowinserted > 0) {
                 System.out.println("Insertion successful");
             }
@@ -167,10 +118,7 @@ public class BooksDatamangement {
             System.out.println("Enter the User id : ");
             int u_id=sc.nextInt();
 
-            String idcheck="SELECT COUNT(*) FROM adminuser WHERE u_id=?";
-            PreparedStatement idcheckPreparedStatement= DatabaseConnection.connection.prepareStatement(idcheck);
-            idcheckPreparedStatement.setInt(1, u_id);
-            ResultSet idc = idcheckPreparedStatement.executeQuery();
+            ResultSet idc = BooksDataAccess.getUserById(u_id);
             idc.next();
             int count1 = idc.getInt(1);
 
@@ -180,11 +128,7 @@ public class BooksDatamangement {
                 return;
 
             }
-
-            String bidcheck="SELECT COUNT(*) FROM books WHERE b_id=?";
-            PreparedStatement bidcheckPreparedStatement= DatabaseConnection.connection.prepareStatement(bidcheck);
-            bidcheckPreparedStatement.setInt(1, b_id);
-            ResultSet bidc = bidcheckPreparedStatement.executeQuery();
+            ResultSet bidc = BooksDataAccess.getBookById(b_id);
             bidc.next();
             int countr = bidc.getInt(1);
             if (countr == 0) {
@@ -194,14 +138,7 @@ public class BooksDatamangement {
 
             }
 
-
-
-
-            String checkQuery = "SELECT COUNT(*) FROM userwithbook WHERE b_id = ? AND u_id = ?";
-            PreparedStatement checkStatement = DatabaseConnection.connection.prepareStatement(checkQuery);
-            checkStatement.setInt(1, b_id);
-            checkStatement.setInt(2, u_id);
-            ResultSet checkResult = checkStatement.executeQuery();
+            ResultSet checkResult = BooksDataAccess.checkUserWithBook(b_id,u_id);
             checkResult.next();
             int count = checkResult.getInt(1);
 
@@ -209,23 +146,13 @@ public class BooksDatamangement {
                 System.out.println("User already has the book.");
             } else {
                 sc.nextLine();
-                System.out.println("Enter the book name: ");
-                String name=sc.nextLine();
-                String query = "SELECT quantity FROM books WHERE book_name=? AND b_id=?";
-                PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
-                preparedStatement.setString(1, name);
-                preparedStatement.setInt(2, b_id);
-                ResultSet rs=preparedStatement.executeQuery();
+                ResultSet rs=BooksDataAccess.getBookQuantity(b_id);
                 if (rs.next()) {
 
                     int quant=Integer.parseInt(rs.getString(1)) ;
                     if(quant>0){
                         int newquantity=quant-1;
-                        String updatequery="UPDATE books SET quantity = ? WHERE book_name=?";
-                        PreparedStatement preparedStatement2 = DatabaseConnection.connection.prepareStatement(updatequery);
-                        preparedStatement2.setInt(1, newquantity);
-                        preparedStatement2.setString(2, name);
-                        int count2=preparedStatement2.executeUpdate();
+                        int count2=BooksDataAccess.updateBookQuantity(b_id,newquantity);
                         System.out.println(count2);
 
                         // Get the current date for borrow_date
@@ -233,13 +160,7 @@ public class BooksDatamangement {
                         java.sql.Date borrowDate = new java.sql.Date(currentDate.getTime());
 
                         // Add the borrowed book to the userwithbook table
-                        String addUserBookQuery = "INSERT INTO userwithbook (b_id, u_id, borrow_date) VALUES (?, ?, ?)";
-                        PreparedStatement addUserBookStatement = DatabaseConnection.connection
-                                .prepareStatement(addUserBookQuery);
-                        addUserBookStatement.setInt(1, b_id);
-                        addUserBookStatement.setInt(2, u_id);
-                        addUserBookStatement.setDate(3, borrowDate);
-                        int insertCount = addUserBookStatement.executeUpdate();
+                        int insertCount = BooksDataAccess.borrowBook(b_id,u_id,borrowDate);
                         System.out.println(insertCount);
 
 
@@ -252,7 +173,6 @@ public class BooksDatamangement {
                 else{
                     System.out.println("No book found");
                 }
-                // sc.close();
             } }
         catch (SQLException e) {
             e.printStackTrace();
@@ -270,10 +190,7 @@ public class BooksDatamangement {
             System.out.println("Enter your id: ");
             int u_id=sc.nextInt();
 
-            String idcheck="SELECT COUNT(*) FROM adminuser WHERE u_id=?";
-            PreparedStatement idcheckPreparedStatement= DatabaseConnection.connection.prepareStatement(idcheck);
-            idcheckPreparedStatement.setInt(1, u_id);
-            ResultSet idc = idcheckPreparedStatement.executeQuery();
+            ResultSet idc = BooksDataAccess.getUserById(u_id);
             idc.next();
             int count1 = idc.getInt(1);
 
@@ -284,10 +201,7 @@ public class BooksDatamangement {
 
             }
 
-            String bidcheck="SELECT COUNT(*) FROM books WHERE b_id=?";
-            PreparedStatement bidcheckPreparedStatement= DatabaseConnection.connection.prepareStatement(bidcheck);
-            bidcheckPreparedStatement.setInt(1, b_id);
-            ResultSet bidc = bidcheckPreparedStatement.executeQuery();
+            ResultSet bidc = BooksDataAccess.getBookById(b_id);
             bidc.next();
             int countr = bidc.getInt(1);
             if (countr == 0) {
@@ -296,50 +210,23 @@ public class BooksDatamangement {
                 return;
 
             }
-
-            String checkQuery = "SELECT COUNT(*) FROM userwithbook WHERE b_id = ? AND u_id = ?";
-            PreparedStatement checkStatement = DatabaseConnection.connection.prepareStatement(checkQuery);
-            checkStatement.setInt(1, b_id);
-            checkStatement.setInt(2, u_id);
-            ResultSet checkResult = checkStatement.executeQuery();
+            ResultSet checkResult = BooksDataAccess.checkUserWithBook(b_id,u_id);
             checkResult.next();
             int count = checkResult.getInt(1);
 
             if (count > 0) {
                 // System.out.println("User already has the book.");}
-
-                String query = "SELECT quantity FROM books WHERE b_id=?";
-                String namequery="SELECT name FROM adminuser WHERE  u_id=?";
-                PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
-                preparedStatement.setInt(1, b_id);
-                ResultSet rs=preparedStatement.executeQuery();
-
-                PreparedStatement preparedStatementname = DatabaseConnection.connection.prepareStatement(namequery);
-                preparedStatementname.setInt(1, u_id);
-                ResultSet rs2=preparedStatementname.executeQuery();
+                ResultSet rs=BooksDataAccess.getBookQuantity(b_id);
+                ResultSet rs2=BooksDataAccess.getnamefromadminuser(u_id);
 
                 if (rs.next() && rs2.next()) {
                     int quant=Integer.parseInt(rs.getString(1)) ;
-                    // if(quant>=0){
                     int newquantity=quant+1;
-                    String updatequery="UPDATE books SET quantity = ? WHERE b_id=?";
-                    PreparedStatement preparedStatement2 = DatabaseConnection.connection.prepareStatement(updatequery);
-                    preparedStatement2.setInt(1, newquantity);
-                    preparedStatement2.setInt(2, b_id);
-                    int count12=preparedStatement2.executeUpdate();
+
+                    int count12=BooksDataAccess.updateBookQuantity(b_id,newquantity);
                     System.out.println(count12);
 
-                    // java.util.Date currentDate = new java.util.Date();
-                    //  java.sql.Date returnDate = new java.sql.Date(currentDate.getTime());
-
-                    // Add the borrowed book to the userwithbook table
-                    String addUserBookQuery = "DELETE FROM userwithbook where b_id=? AND u_id=?";
-                    PreparedStatement addUserBookStatement = DatabaseConnection.connection
-                            .prepareStatement(addUserBookQuery);
-                    addUserBookStatement.setInt(1, b_id);
-                    addUserBookStatement.setInt(2, u_id);
-                    //  addUserBookStatement.setDate(3, returnDate);
-                    int insertCount = addUserBookStatement.executeUpdate();
+                    int insertCount = BooksDataAccess.returnBook(b_id,u_id);
                     System.out.println(insertCount);
 
 
@@ -347,7 +234,6 @@ public class BooksDatamangement {
                 else{
                     System.out.println("No book found");
                 }
-                // sc.close();
             }
             else{
                 System.out.println("You don't have any book to return.");
@@ -365,11 +251,7 @@ public class BooksDatamangement {
             Scanner sc =new Scanner(System.in);
             System.out.println("Enter Book name:");
             String book_name=sc.nextLine();
-
-            String query = "SELECT * FROM books WHERE book_name=?";
-            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
-            preparedStatement.setString(1, book_name);
-            ResultSet rs=preparedStatement.executeQuery();
+            ResultSet rs=BooksDataAccess.getBookByName(book_name);
             if(rs.next()){
                 System.out.println("Here is the information.");
                 System.out.print("id : "+ rs.getString(1)+", ");
@@ -385,8 +267,6 @@ public class BooksDatamangement {
                 System.out.println("Book not found in database ");
             }
 
-            // sc.close();
-
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -397,8 +277,6 @@ public class BooksDatamangement {
     public static void Update_Book(){
         try {
 
-            // java.util.Date currentDate = new java.util.Date();
-            // java.sql.Date sqlCurrentDate = new java.sql.Date(currentDate.getTime());
             Scanner sc =new Scanner(System.in);
             System.out.println("Enter Your U_id");
             int u_id=sc.nextInt();
@@ -406,12 +284,7 @@ public class BooksDatamangement {
             System.out.println("Enter Your Password");
             String Password=sc.nextLine();
 
-            String querylogin = "SELECT isadmin FROM adminuser WHERE u_id=? AND Password=?";
-            PreparedStatement preparedStatementlogin=DatabaseConnection.connection.prepareStatement(querylogin);
-            preparedStatementlogin.setInt(1,u_id) ;
-            preparedStatementlogin.setString(2,Password);
-
-            ResultSet adminlogin=preparedStatementlogin.executeQuery();
+            ResultSet adminlogin=BooksDataAccess.getAdminByIdAndPassword(u_id,Password);
 
             if(adminlogin.next()){
                 System.out.println(adminlogin.getString(1));
@@ -434,12 +307,7 @@ public class BooksDatamangement {
                             System.out.println("Enter Your Book Name");
                             String name=sc.nextLine();
 
-
-                            String query = "UPDATE books SET book_name=? where b_id=?";
-                            PreparedStatement preparedStatement = DatabaseConnection.connection.prepareStatement(query);
-                            preparedStatement.setString(1,name) ;
-                            preparedStatement.setInt(2, b_id);
-                            int rowsUpdatedName = preparedStatement.executeUpdate();
+                            int rowsUpdatedName = BooksDataAccess.updateBookname(b_id,name);
                             if (rowsUpdatedName > 0) {
                                 System.out.println("Book name updated successfully.");
                             }
@@ -451,14 +319,9 @@ public class BooksDatamangement {
                         case 2:
                             sc.nextLine();
                             System.out.println("Enter Geners:");
-                            String geners = sc.nextLine();
+                            String gener = sc.nextLine();
 
-
-                            String query2 = "UPDATE books SET geners=? where b_id=?";
-                            PreparedStatement preparedStatement2 = DatabaseConnection.connection.prepareStatement(query2);
-                            preparedStatement2.setString(1,geners) ;
-                            preparedStatement2.setInt(2, b_id);
-                            int rowsUpdatedAge = preparedStatement2.executeUpdate();
+                            int rowsUpdatedAge = BooksDataAccess.updateBookgeners(b_id,gener);
                             if (rowsUpdatedAge > 0) {
                                 System.out.println("Geners updated successfully.");
                             }
@@ -471,12 +334,8 @@ public class BooksDatamangement {
                             sc.nextLine();
                             System.out.println("Enter Author:");
                             String author = sc.nextLine();
-                            String queryPassword = "UPDATE books SET author=? where b_id=?";
-                            PreparedStatement preparedstatementauthor = DatabaseConnection.connection.prepareStatement(queryPassword);
-                            preparedstatementauthor.setString(1, author);
-                            preparedstatementauthor.setInt(2, b_id);
 
-                            int rowsUpdatedPassword = preparedstatementauthor.executeUpdate();
+                            int rowsUpdatedPassword = BooksDataAccess.updateBookauthor(b_id,author);
                             if (rowsUpdatedPassword > 0) {
                                 System.out.println("Password updated successfully.");
                             }
@@ -490,13 +349,7 @@ public class BooksDatamangement {
                             System.out.println("Quantity");
                             int Quantity = sc.nextInt();
 
-                            String queryQunatity= "UPDATE books SET quantity=? WHERE b_id=?";
-                            PreparedStatement preparedstatmentquantity = DatabaseConnection.connection.prepareStatement(queryQunatity);
-                            preparedstatmentquantity.setInt(1, Quantity);
-
-                            preparedstatmentquantity.setInt(2, b_id);
-
-                            int rowupdatequant = preparedstatmentquantity.executeUpdate();
+                            int rowupdatequant = BooksDataAccess.updateBookQuantity(b_id,Quantity);
                             if (rowupdatequant > 0) {
                                 System.out.println("Quantity updated successfully.");
                             }
@@ -509,12 +362,8 @@ public class BooksDatamangement {
                             sc.nextLine();
                             System.out.println("Enter price:");
                             Double Price = sc.nextDouble();
-                            String queryPrice = "UPDATE books SET price=? WHERE b_id=?";
-                            PreparedStatement preparedStatementprice = DatabaseConnection.connection.prepareStatement(queryPrice);
-                            preparedStatementprice.setDouble(1, Price);
-                            preparedStatementprice.setInt(2, b_id);
 
-                            int rowsUpdatedprice = preparedStatementprice.executeUpdate();
+                            int rowsUpdatedprice = BooksDataAccess.updateBookprice(b_id,Price);
                             if (rowsUpdatedprice > 0) {
                                 System.out.println("Price updated successfully.");
                             }
@@ -527,11 +376,7 @@ public class BooksDatamangement {
                             sc.nextLine();
                             System.out.println("Enter Reviews (1 to 5):");
                             Double Reviews = sc.nextDouble();
-                            String queryreviews = "UPDATE books SET Reviews=? WHERE b_id=? ";
-                            PreparedStatement preparedStatementreviews = DatabaseConnection.connection.prepareStatement(queryreviews);
-                            preparedStatementreviews.setDouble(1, Reviews);
-                            preparedStatementreviews.setInt(2, b_id);
-                            int rowsupdatereviews = preparedStatementreviews.executeUpdate();
+                            int rowsupdatereviews = BooksDataAccess.updateBookreviews(b_id,Reviews);
                             if (rowsupdatereviews > 0) {
                                 System.out.println("Price updated successfully.");
                             }
@@ -544,7 +389,6 @@ public class BooksDatamangement {
                             break;
                     }
 
-                    // sc.close();
 
                 } }
             else{
@@ -555,7 +399,6 @@ public class BooksDatamangement {
         catch (Exception e) {
             e.printStackTrace();
         }
-
 
     }
 }
