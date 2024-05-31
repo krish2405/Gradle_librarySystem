@@ -45,8 +45,6 @@ public class UserInteraction {
                 "FOREIGN KEY (u_id) REFERENCES adminuser(u_id)";
 
 
-
-
         BooksDatamangement.createTableIfNotExists(tablenamebooks,columndefintion);
         int admintablecheck=UserDatamanagement.createTableIfNotExists(tableNameadminuser, columnDefinitionforadminuser);
         if(admintablecheck==1){
