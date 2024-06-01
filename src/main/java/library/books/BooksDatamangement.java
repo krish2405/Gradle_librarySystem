@@ -6,7 +6,7 @@ import java.util.Scanner;
 import library.DOAforBooks.BooksDataAccess;
 import  library.data.DatabaseConnection;
 import library.utility.Utilityfunctions;
-
+import library.userdata.UserDatamanagement;
 
 public class BooksDatamangement {
 
@@ -115,8 +115,8 @@ public class BooksDatamangement {
             System.out.println("Enter the Book id : ");
             int b_id=sc.nextInt();
 
-            System.out.println("Enter the User id : ");
-            int u_id=sc.nextInt();
+            System.out.println("Your User id is : "+ UserDatamanagement.login_uid);
+            int u_id=UserDatamanagement.login_uid;
 
             ResultSet idc = BooksDataAccess.getUserById(u_id);
             idc.next();
@@ -153,7 +153,7 @@ public class BooksDatamangement {
                     if(quant>0){
                         int newquantity=quant-1;
                         int count2=BooksDataAccess.updateBookQuantity(b_id,newquantity);
-                        System.out.println(count2);
+//                        System.out.println(count2);
 
                         // Get the current date for borrow_date
                         java.util.Date currentDate = new java.util.Date();
@@ -161,7 +161,7 @@ public class BooksDatamangement {
 
                         // Add the borrowed book to the userwithbook table
                         int insertCount = BooksDataAccess.borrowBook(b_id,u_id,borrowDate);
-                        System.out.println(insertCount);
+                        System.out.println(insertCount + " Book has been borrowed ");
 
 
                     }
@@ -187,8 +187,8 @@ public class BooksDatamangement {
             System.out.println("Enter the book id: ");
             int b_id=sc.nextInt();
 
-            System.out.println("Enter your id: ");
-            int u_id=sc.nextInt();
+            System.out.println("your user id is : "+UserDatamanagement.login_uid);
+            int u_id=UserDatamanagement.login_uid;
 
             ResultSet idc = BooksDataAccess.getUserById(u_id);
             idc.next();
@@ -224,10 +224,10 @@ public class BooksDatamangement {
                     int newquantity=quant+1;
 
                     int count12=BooksDataAccess.updateBookQuantity(b_id,newquantity);
-                    System.out.println(count12);
+//                    System.out.println(count12);
 
                     int insertCount = BooksDataAccess.returnBook(b_id,u_id);
-                    System.out.println(insertCount);
+                    System.out.println(insertCount + " Book has been returned");
 
 
                 }

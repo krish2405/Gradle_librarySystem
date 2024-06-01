@@ -12,6 +12,8 @@ import library.DOA.QueryOperation;
 
 public class UserDatamanagement {
 
+    public static int login_uid;
+
     // Table for user and admin
     public static void createTable(String tableName, String columnDefinitions) {
         try {
@@ -62,6 +64,9 @@ public class UserDatamanagement {
 
             if (resultSet.next()) {
                 String adminornot = resultSet.getString(1);
+                login_uid=resultSet.getInt(2);
+                System.out.println("login id is "+ login_uid);
+
                 System.out.println(adminornot);
                 System.out.println("USer login successfully");
                 return adminornot;
